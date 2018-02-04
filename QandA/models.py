@@ -16,9 +16,8 @@ class Meetings(models.Model):
     )
     venue = models.CharField(max_length=50,choices=VENUE_CHOICES,default=JARVIS)
     moderator_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField(help_text="Please use the following format: <em>YYYY-MM-DD</em>."
-)
+    start_time = models.DateTimeField(help_text="Please use the following format: <em>YYYY-MM-DD</em>.")
+    end_time = models.DateTimeField(help_text="Please use the following format: <em>YYYY-MM-DD</em>.")
 
 
 class Question(models.Model):
