@@ -17,7 +17,6 @@ class Meetings(models.Model):
     start_time = models.DateTimeField(help_text="Start time of the meeting")
     end_time = models.DateTimeField(help_text="End time of the meeting")
 
-
 class Question(models.Model):
     YES = 1
     NO = 2
@@ -30,6 +29,12 @@ class Question(models.Model):
     asker = models.ForeignKey(User,on_delete=models.CASCADE)
     anon_status = models.SmallIntegerField(choices=ANON_CHOICES,default=NO)
 
+    def __str__(self):
+        if self.anon_status == 1:
+            return "%s MEETING ID: %s AUTHOR:ANONYMOUS" % (self.question_text,self.meeting_id)
+        else:
+            return '%s MEETING ID: %s  AUTHOR: %s' % (self.question_text,self.meeting_id,self.asker)
+
 class Message(models.Model):
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
     text = models.CharField(max_length = 1000)
@@ -39,9 +44,9 @@ class Voting(models.Model):
     DOWNVOTE = 2
     NONE = 3
     VOTING_CHOICES = (
-        (UPVOTE, 'up'),
-        (DOWNVOTE, 'dn'),
-        (NONE, 'n'),
+        (UPVOTE, 'Upvote'),
+        (DOWNVOTE, 'Downvote'),
+        (NONE, 'None'),
     )
     user_id = models.ForeignKey(User,on_delete=models.CASCADE)
     question_id = models.ForeignKey(Question,on_delete=models.CASCADE)
