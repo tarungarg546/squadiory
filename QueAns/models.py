@@ -38,11 +38,6 @@ class Question(models.Model):
     anon_status = models.SmallIntegerField(choices=ANON_CHOICES, default=NO)
 
 
-class Message(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.CharField(max_length=1000)
-
-
 class Voting(models.Model):
     UPVOTE = 1
     DOWNVOTE = 2
