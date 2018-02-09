@@ -54,13 +54,11 @@ class Voting(models.Model):
 
 
 class Satisfaction(models.Model):
-    YES = 1
-    NO = 2
     SATISFACTION_CHOICES = (
-        (YES, 'yes'),
-        (NO, 'no'),
+        (True, 'Yes'),
+        (False, 'No')
     )
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     question_id = models.ForeignKey(Question, on_delete=models.CASCADE)
-    satisf_status = models.BooleanField(choices=SATISFACTION_CHOICES, default=YES)
+    satisf_status = models.BooleanField(choices=SATISFACTION_CHOICES, default=True)

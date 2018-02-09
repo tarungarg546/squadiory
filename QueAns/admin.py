@@ -2,7 +2,6 @@ from django.contrib import admin
 from .models import Question, Meetings, Voting, Satisfaction
 from django.utils.safestring import mark_safe
 
-
 class MeetingsAdmin(admin.ModelAdmin):
     list_display = ['meetings_text']
 
@@ -27,8 +26,42 @@ class MeetingsAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
     fields = ['question_text', 'anon_status', 'meeting_id']
-    list_filter = ['meeting_id',]
-    list_display = ['question_text', 'upvote_button', 'downvote_button', 'satisfied_button', 'disatisfied_button']
+    list_filter = ['meeting_id', ]
+    list_display = ['question_text', 'upvote_button', 'upvote_count', 'downvote_button', 'downvote_count',
+                    'satisfied_button', 'satisfaction_count', 'disatisfied_button', 'disatisfaction_count']
+
+
+    def upvote_count(self, obj):
+        list = Voting.objects.filter(question_id=obj.id).values_list('vote')
+        list = list.filter(vote=1)
+        return len(list)
+
+    upvote_count.short_description = 'Up Count'
+    upvote_count.allow_tags = True
+
+    def downvote_count(self, obj):
+        list = Voting.objects.filter(question_id=obj.id).values_list('vote')
+        list = list.filter(vote=2)
+        return len(list)
+
+    downvote_count.short_description = 'Down Count'
+    downvote_count.allow_tags = True
+
+    def satisfaction_count(self, obj):
+        list = Satisfaction.objects.filter(question_id=obj.id).values_list('satisf_status')
+        list = list.filter(satisf_status=True)
+        return len(list)
+
+    satisfaction_count.short_description = 'Satis_ Count'
+    satisfaction_count.allow_tags = True
+
+    def disatisfaction_count(self, obj):
+        list = Satisfaction.objects.filter(question_id=obj.id).values_list('satisf_status')
+        list = list.filter(satisf_status=False)
+        return len(list)
+
+    disatisfaction_count.short_description = 'Disatis_ Count'
+    disatisfaction_count.allowed_tags = True
 
     def upvote_button(self, request):
         return mark_safe('<button type="button" onclick="upvote(request.user.id,obj.question_id)">Upvote</button>')
@@ -36,20 +69,22 @@ class QuestionAdmin(admin.ModelAdmin):
     upvote_button.short_description = 'Upvote'
     upvote_button.allow_tags = True
 
-    def downvote_button(self,request):
+    def downvote_button(self, request):
         return mark_safe('<button type="button" onclick="downvote(request.user.id,obj.question_id)">Downvote</button>')
 
     downvote_button.short_description = 'Downvote'
     downvote_button.allow_tags = True
 
     def satisfied_button(self, request):
-        return mark_safe('<button type="button" onclick="satisfied(request.user.id,obj.question_id)">Satisfied</button>')
+        return mark_safe(
+            '<button type="button" onclick="satisfied(request.user.id,obj.question_id)">Satisfied</button>')
 
     satisfied_button.short_description = 'Satisfy'
     satisfied_button.allow_tags = True
 
     def disatisfied_button(self, request):
-        return mark_safe('<button type="button" onclick="disatisfied(request.user.id,obj.question_id)">Disatisfied</button>')
+        return mark_safe(
+            '<button type="button" onclick="disatisfied(request.user.id,obj.question_id)">Disatisfied</button>')
 
     disatisfied_button.short_description = 'Disatisfied'
     disatisfied_button.allow_tags = True
@@ -71,9 +106,11 @@ class QuestionAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         """
+        Function to make currently logged is user as the person asking the question.
+
         List of parameters of save_model:
-        :param request: to access the current user
-        :param obj: to access the attributes of the model
+        :param request: parameter to access to currently logged in user
+        :param obj: Used to access the attribute asker of Question table
         :param form: --
         :param change: --
         :return: super(function)
@@ -93,8 +130,10 @@ class VotingAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and not request.user.is_superuser:
             return ['question_id']
+        elif obj is not None and request.user.id != obj.id:
+            return ['question_id','vote']
         else:
-            return []
+            return[]
 
     def save_model(self, request, obj, form, change):
         obj.user_id = request.user
@@ -112,6 +151,8 @@ class SatisfactionAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         if obj is not None and not request.user.is_superuser:
             return ['question_id']
+        elif obj is not None and request.user.id != obj.id:
+            return ['question_id', 'satisf_status']
         else:
             return []
 
